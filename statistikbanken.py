@@ -1,45 +1,44 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import urllib.request
-import json
+import requests
 
 baseurl = 'http://api.statbank.dk/v1/'
 
-def getjson(url):
-    response = urllib \
-        .request \
-        .urlopen(url) \
-        .read() \
-        .decode('utf8')
-    return json.loads(response)
+def get_json(url,function, data):
+    '''
+     Henter JSON data fra url.
+    '''
+
+    return requests.post(url + function, data).json()
 
 
-###########################
-##          EMNER        ##
-###########################
+def get_all_subjects():
+    '''
+    Henter alle emner, underemner og tabeller fra API'et. 
+    '''
+    funktion = 'subjects'
+    data = {'recursive': 'true','includetables': 'true', 'format': 'JSON'}
+    return get_json(baseurl, funktion, data)
 
-def getallsubjects():
-    """Henter alle emner, underemer og tabeller"""
-    json_obj = getjson(baseurl + 'subjects?recursive=true&includeTables=true')
-    return json_obj
+def get_main_subjects():
+    '''
+    Henter alle hovedemner fra API'et.
+    '''
 
-def getmainsubjects():
-    """hent alle hovedemner"""
-    json_obj = getjson(baseurl + 'subjects')
-    for i in range(len(json_obj)):
-        print(json_obj[i]['id'], json_obj[i]['description'])
+    return get_json(baseurl, 'subjects', {})
 
-def getsubjects(subject_id):
-    """hent underemner for et emne"""
-    json_obj = getjson(baseurl + 'subjects/' + subject_id)
-    if json_obj[0]['hasSubjects'] == True:
-        for i in range(len(json_obj[0]['subjects'])):
-            print(json_obj[0]['subjects'][i]['id'], json_obj[0]['subjects'][i]['description'])
-    else:
-        print('Har ingen underemner')
+def get_subjects(subject_ids):
+    '''
+    Henter alle underemner fra et eller flere hovedemner.
+     
+     Tager i mod en liste af hovedemne id. F.eks. ['02', '03']
+    '''
 
+    data = {'subjects': subject_ids, 'format': 'JSON'}
+    return get_json(baseurl, 'subjects', data)
 
-#getmainsubjects()
-#print(getallsubjects())
-getsubjects('02')
+if __name__ == '__main__':
+    # get_all_subjects()
+    # get_main_subjects()
+    # get_subjects(['02'])
