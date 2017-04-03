@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import requests
-import json
 
 baseurl = 'http://api.statbank.dk/v1/'
 
@@ -11,8 +10,8 @@ def get_json(url,function, data):
      Henter JSON data fra url.
     '''
 
-    response = requests.post(url + function, data).text
-    return json.loads(response)
+    return requests.post(url + function, data).json()
+
 
 def get_all_subjects():
     '''
