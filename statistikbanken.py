@@ -11,7 +11,7 @@ def get_json(url,function, data):
      Henter JSON data fra url.
     '''
 
-    req = urllib2.Request(baseurl + function)
+    req = urllib2.Request(url + function)
 
     req.add_header('Content-Type', 'application/json')
     response = urllib2.urlopen(req, json.dumps(data))
