@@ -84,8 +84,6 @@ if __name__ == '__main__':
     #data = get_variables('FODIE')
     #data = output = get_subjects(['02'])
     #print( output )
-    data = get_data(post_body)
-    print data
     data = get_data(table, variables)
     print data
     #print variables[0]['values']
