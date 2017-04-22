@@ -57,29 +57,22 @@ def get_variables(table_id):
 
     return variables_lst
 
-kommuner = ["151", "169"]
-tid = ["2017K1", "2016K3"]
+table = 'folk1a'
+variables = [
+    {'code': 'OMRÅDE', 'values': ["151", "169"]},
+    {'code': 'TID', 'values': ["2017K1", "2016K3"]}
+]
 
-post_body = \
-    {
-       "table": "folk1a",
-       "format": "JSONSTAT",
-       "variables": [
-          {
-             "code": "OMRÅDE",
-             "values": kommuner
-
-          },
-          {
-             "code": "TID",
-             "values": tid
-          }
-       ]
-    }
-
-def get_data(post_body):
+def get_data(table, variables):
+    '''henter data fra API i JSONSTAT format'''
     endpoint = 'data'
-    return get_json('http://api.statbank.dk/v1/', endpoint, post_body)
+    post_body = \
+        {
+            "table": table,
+            "variables": variables,
+            "format": "JSONSTAT"
+        }
+    return get_json(baseurl, endpoint, post_body)
 
 
 
@@ -87,8 +80,9 @@ if __name__ == '__main__':
     # get_all_subjects()
     # get_main_subjects()
     # get_subjects(['02'])
-    # get_variables('FODIE')
-    #output = get_subjects(['02'])
+    #data = get_variables('FODIE')
+    #data = output = get_subjects(['02'])
     #print( output )
-    data = get_data(post_body)
+    data = get_data(table, variables)
     print data
+    #print variables[0]['values']
