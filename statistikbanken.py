@@ -11,12 +11,8 @@ def get_json(url,function, data):
      Henter JSON data fra url.
     '''
 
-    req = urllib2.Request(baseurl + function, headers={'Content-Type': 'application/json'})
-    req = urllib2.Request(url + function)
-
-    req.add_header('Content-Type', 'application/json')
+    req = urllib2.Request(url + function, headers={'Content-Type': 'application/json'})
     response = urllib2.urlopen(req, json.dumps(data))
-
     charset = response.headers.getparam('charset')
     result = json.loads(response.read().decode(charset))
 
@@ -58,12 +54,6 @@ def get_variables(table_id):
 
     return variables_lst
 
-table = 'folk1a'
-variables = [
-    {'code': 'OMRÅDE', 'values': ["151", "169"]},
-    {'code': 'TID', 'values': ["2017K1", "2016K3"]}
-]
-
 def get_data(table, variables):
     '''henter data fra API i JSONSTAT format'''
     endpoint = 'data'
@@ -78,12 +68,10 @@ def get_data(table, variables):
 
 
 if __name__ == '__main__':
-    # get_all_subjects()
-    # get_main_subjects()
-    # get_subjects(['02'])
-    #data = get_variables('FODIE')
-    #data = output = get_subjects(['02'])
-    #print( output )
-    data = get_data(table, variables)
-    print data
-    #print variables[0]['values']
+    # table = 'folk1a'
+    # variables = [
+    #     {'code': 'OMRÅDE', 'values': ["151", "169"]},
+    #     {'code': 'TID', 'values': ["2017K1", "2016K3"]}
+    # ]
+    # data = get_data(table, variables)
+    # print data
