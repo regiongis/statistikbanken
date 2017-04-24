@@ -50,7 +50,7 @@ def get_variables(table_id):
     }
     table = get_json(baseurl, 'tableinfo', post_body)
     variables = table['variables']
-    variables_lst = [{'id': i['id'], 'text': i['text']} for i in variables]
+    variables_lst = [{'id': i['id'], 'text': i['text'], 'values': i['values']} for i in variables]
 
     return variables_lst
 
