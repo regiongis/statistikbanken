@@ -28,6 +28,7 @@ import resources
 from statistikbanken_dialog import StatistikBankenDialog
 import os.path
 
+from statistikbanken_api import Statbank_api
 
 class StatistikBanken:
     """QGIS Plugin Implementation."""
@@ -179,6 +180,9 @@ class StatistikBanken:
         # remove the toolbar
         del self.toolbar
 
+    def connections(self):
+        """Forbinder gui til funktioner"""
+        pass
 
     def run(self):
         """Run method that performs all the real work"""
