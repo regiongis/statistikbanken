@@ -14,9 +14,6 @@
    <string>Statistikbanken</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" rowspan="2">
-    <widget class="QTreeView" name="treeView"/>
-   </item>
    <item row="1" column="1">
     <widget class="QListView" name="listView_2"/>
    </item>
@@ -24,10 +21,19 @@
     <widget class="QListView" name="listView"/>
    </item>
    <item row="2" column="1">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>TEST KNAP</string>
      </property>
+    </widget>
+   </item>
+   <item row="0" column="0" rowspan="2">
+    <widget class="QTreeWidget" name="treeWidget">
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
     </widget>
    </item>
   </layout>
