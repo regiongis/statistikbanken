@@ -67,6 +67,9 @@ class StatistikBanken:
         self.toolbar = self.iface.addToolBar(u'StatistikBanken')
         self.toolbar.setObjectName(u'StatistikBanken')
 
+        # Vores funktioner
+        self.StatBank_api = Statbank_api()
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -169,6 +172,9 @@ class StatistikBanken:
             callback=self.run,
             parent=self.iface.mainWindow())
 
+        # TODO Flyt det her et andet sted!
+        self.set_tree()
+
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -186,27 +192,17 @@ class StatistikBanken:
 
     def set_tree(self):
         tree_widget = self.dlg.treeWidget
-        instance = Statbank_api()
-        main_sub = instance.get_main_subjects()
-        print main_sub
+        main_sub = self.StatBank_api.get_main_subjects()
+
         for i in main_sub:
             mainsubject = i['description']
-            tree_widget.addTopLevelItem(QTreeWidgetItem(mainsubject))
-        # print tree_widget
-        # test = ['blah', 'BLAH!!!', 'TEST TEST']
-        # lst = []
-        # print lst
-        # for i in test:
-        #     lst.append(QTreeWidgetItem(i))
-        #     print QTreeWidgetItem(i)
-        # # tree_widget.addTopLevelItems(lst)
+            tree_widget.addTopLevelItem(QTreeWidgetItem([mainsubject]))
+
 
     def run(self):
         """Run method that performs all the real work"""
         # show the dialog
         self.dlg.show()
-
-        self.set_tree()
 
         # Run the dialog event loop
         result = self.dlg.exec_()
