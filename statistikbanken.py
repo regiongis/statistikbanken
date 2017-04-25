@@ -4,74 +4,68 @@
 import urllib2
 import json
 
-baseurl = 'http://api.statbank.dk/v1/'
+class Statbank_api():
 
-def get_json(url,function, data):
-    '''
-     Henter JSON data fra url.
-    '''
+    url = 'http://api.statbank.dk/v1/'
 
-    req = urllib2.Request(url + function, headers={'Content-Type': 'application/json'})
-    response = urllib2.urlopen(req, json.dumps(data))
-    charset = response.headers.getparam('charset')
-    result = json.loads(response.read().decode(charset))
+    def get_json(self, url, function, data):
+        '''
+         Henter JSON data fra url.
+        '''
 
-    return result
+        req = urllib2.Request(url + function, headers={'Content-Type': 'application/json'})
+        response = urllib2.urlopen(req, json.dumps(data))
+        charset = response.headers.getparam('charset')
+        result = json.loads(response.read().decode(charset))
 
-def get_all_subjects():
-    '''
-    Henter alle emner, underemner og tabeller fra API'et. 
-    '''
-    funktion = 'subjects'
-    data = {'recursive': 'true','includetables': 'true', 'format': 'JSON'}
-    return get_json(baseurl, funktion, data)
+        return result
 
-def get_main_subjects():
-    '''
-    Henter alle hovedemner fra API'et.
-    '''
+    def get_all_subjects(self):
+        '''
+        Henter alle emner, underemner og tabeller fra API'et. 
+        '''
+        funktion = 'subjects'
+        data = {'recursive': 'true','includetables': 'true', 'format': 'JSON'}
+        return self.get_json(self.url, funktion, data)
 
-    return get_json(baseurl, 'subjects', {})
+    def get_main_subjects(self):
+        '''
+        Henter alle hovedemner fra API'et.
+        '''
 
-def get_subjects(subject_ids):
-    '''
-    Henter alle underemner fra et eller flere hovedemner.
-     
-     Tager i mod en liste af hovedemne id. F.eks. ['02', '03']
-    '''
+        return self.get_json(self.url, 'subjects', {})
 
-    data = {'subjects': subject_ids, 'format': 'JSON'}
-    return get_json(baseurl, 'subjects', data)
+    def get_subjects(self, subject_ids):
+        '''
+        Henter alle underemner fra et eller flere hovedemner.
+         
+         Tager i mod en liste af hovedemne id. F.eks. ['02', '03']
+        '''
 
-def get_variables(table_id):
-    post_body = {
-	    'table': table_id,
-	    'format': 'JSON'
-    }
-    table = get_json(baseurl, 'tableinfo', post_body)
-    variables = table['variables']
-    variables_lst = [{'id': i['id'], 'text': i['text'], 'values': i['values']} for i in variables]
+        data = {'subjects': subject_ids, 'format': 'JSON'}
+        return self.get_json(self.url, 'subjects', data)
 
-    return variables_lst
-
-def get_data(table, variables):
-    '''henter data fra API i JSONSTAT format'''
-    endpoint = 'data'
-    post_body = \
-        {
-            "table": table,
-            "variables": variables,
-            "format": "JSONSTAT"
+    def get_variables(self,table_id):
+        '''
+        Henter variabler og værdier for en tabel
+        '''
+        post_body = {
+            'table': table_id,
+            'format': 'JSON'
         }
-    return get_json(baseurl, endpoint, post_body)
+        table = self.get_json(self.url, 'tableinfo', post_body)
+        variables = table['variables']
+        variables_lst = [{'id': i['id'], 'text': i['text'], 'values': i['values']} for i in variables]
 
+        return variables_lst
 
-
-if __name__ == '__main__':
-    # table = 'folk1a'
-    # variables = [
-    #     {'code': 'OMRÅDE', 'values': ["151", "169"]},
-    #     {'code': 'TID', 'values': ["2017K1", "2016K3"]}
-    # ]
-    # data = get_data(table, variables)
-    # print data
+    def get_data(self, table, variables):
+        '''henter data fra API i JSONSTAT format'''
+        endpoint = 'data'
+        post_body = \
+            {
+                "table": table,
+                "variables": variables,
+                "format": "JSONSTAT"
+            }
+        return self.get_json(self.url, endpoint, post_body)
