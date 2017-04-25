@@ -28,12 +28,10 @@
     </widget>
    </item>
    <item row="0" column="0" rowspan="2">
-    <widget class="QTreeWidget" name="treeWidget">
-     <column>
-      <property name="text">
-       <string notr="true">1</string>
-      </property>
-     </column>
+    <widget class="QTreeView" name="treeView">
+     <property name="headerHidden">
+      <bool>false</bool>
+     </property>
     </widget>
    </item>
   </layout>
