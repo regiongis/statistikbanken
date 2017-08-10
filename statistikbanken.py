@@ -187,10 +187,18 @@ class StatistikBanken:
             pass
         self.dlg.pushButton.clicked.connect(self.populate_listwidget)
 
+        self.dlg.listWidget.itemClicked.connect(self.vis_tabeller)
+
     def populate_listwidget(self):
         main_subjects = self.StatBank_api.get_main_subjects()
         subject_title = [emne['description'] for emne in main_subjects]
         self.dlg.listWidget.addItems(subject_title)
+
+    def vis_tabeller(self):
+        valgt_hovedemne = self.dlg.listWidget.currentItem().text()
+        print(valgt_hovedemne)
+
+
 
 
     def run(self):
