@@ -22,10 +22,10 @@ class Statbank_api():
 
     def get_all_subjects(self):
         '''
-        Henter alle emner, underemner og tabeller fra API'et. 
+        Henter alle emner, underemner og tabeller fra API'et.
         '''
         funktion = 'subjects'
-        data = {'recursive': 'true','includetables': 'true', 'format': 'JSON'}
+        data = {'recursive': 'true', 'format': 'JSON'}
         return self.get_json(self.url, funktion, data)
 
     def get_main_subjects(self):
@@ -38,7 +38,7 @@ class Statbank_api():
     def get_subjects(self, subject_ids):
         '''
         Henter alle underemner fra et eller flere hovedemner.
-         
+
          Tager i mod en liste af hovedemne id. F.eks. ['02', '03']
         '''
 
