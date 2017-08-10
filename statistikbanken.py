@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon, QTreeWidgetItem
+from PyQt4.QtGui import QAction, QIcon
 # Import the code for the dialog
 from statistikbanken_dialog import StatistikBankenDialog
 import os.path
@@ -180,15 +180,17 @@ class StatistikBanken:
 
     def connections(self):
         """Forbinder gui til funktioner"""
-        pass
+        # Test knappen
+        try:
+            self.dlg.pushButton.clicked.disconnect()
+        except:
+            pass
+        self.dlg.pushButton.clicked.connect(self.populate_listwidget)
 
-    def set_tree(self):
-        tree_widget = self.dlg.treeWidget
-        main_sub = self.StatBank_api.get_main_subjects()
-
-        for i in main_sub:
-            mainsubject = i['description']
-            tree_widget.addTopLevelItem(QTreeWidgetItem([mainsubject]))
+    def populate_listwidget(self):
+        main_subjects = self.StatBank_api.get_main_subjects()
+        subject_title = [emne['description'] for emne in main_subjects]
+        self.dlg.listWidget.addItems(subject_title)
 
 
     def run(self):
@@ -196,8 +198,12 @@ class StatistikBanken:
 
         # Vores funktioner
         self.StatBank_api = Statbank_api()
-        # Tilføjer data til treewidget
-        self.set_tree()
+
+        # Forbindelser til knapper
+        self.connections()
+
+        # Tilføj data til listviews
+        self.populate_listwidget()
 
         # show the dialog
         self.dlg.show()
