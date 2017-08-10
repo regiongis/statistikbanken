@@ -14,18 +14,18 @@
    <string>Statistikbanken</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="1">
-    <widget class="QListView" name="listView_2"/>
-   </item>
-   <item row="1" column="0">
-    <widget class="QListView" name="listView"/>
-   </item>
    <item row="2" column="0" colspan="2">
     <widget class="QPushButton" name="pushButton">
      <property name="text">
       <string>TEST KNAP</string>
      </property>
     </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QListWidget" name="listWidget"/>
+   </item>
+   <item row="1" column="1">
+    <widget class="QListWidget" name="listWidget_2"/>
    </item>
   </layout>
  </widget>
