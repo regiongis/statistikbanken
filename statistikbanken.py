@@ -187,17 +187,27 @@ class StatistikBanken:
             pass
         self.dlg.pushButton.clicked.connect(self.populate_listwidget)
 
-        self.dlg.listWidget.itemClicked.connect(self.vis_tabeller)
+        try:
+            self.dlg.listWidget.itemClicked.disconnect()
+        except:
+            pass
+        self.dlg.listWidget.itemClicked.connect(self.hent_underemne)
 
     def populate_listwidget(self):
+        self.dlg.listWidget.clear()
         main_subjects = self.StatBank_api.get_main_subjects()
-        subject_title = [emne['description'] for emne in main_subjects]
-        self.dlg.listWidget.addItems(subject_title)
+        self.subjects_lst = [[i['id'], i['description']] for i in main_subjects]
+        self.dlg.listWidget.addItems([i[1] for i in self.subjects_lst])
 
-    def vis_tabeller(self):
+    def hent_underemne(self):
+        self.dlg.listWidget_2.clear()
         valgt_hovedemne = self.dlg.listWidget.currentItem().text()
-        print(valgt_hovedemne)
-
+        emne_id = []
+        for i in self.subjects_lst:
+            if valgt_hovedemne in i:
+                emne_id.append(i[0])
+        underemne_data = self.StatBank_api.get_subjects(emne_id)
+        self.dlg.listWidget_2.addItems([i['description'] for i in underemne_data[0]['subjects']])
 
 
 
