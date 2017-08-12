@@ -195,20 +195,19 @@ class StatistikBanken:
 
     def populate_listwidget(self):
         self.dlg.listWidget.clear()
-        main_subjects = self.StatBank_api.get_main_subjects()
-        self.subjects_lst = [[i['id'], i['description']] for i in main_subjects]
-        self.dlg.listWidget.addItems([i[1] for i in self.subjects_lst])
+        self.all_subjects = self.StatBank_api.get_all_subjects()
+        self.dlg.listWidget.addItems([i['description'] for i in self.all_subjects])
 
     def hent_underemne(self):
         self.dlg.listWidget_2.clear()
-        valgt_hovedemne = self.dlg.listWidget.currentItem().text()
-        emne_id = []
-        for i in self.subjects_lst:
-            if valgt_hovedemne in i:
-                emne_id.append(i[0])
-        underemne_data = self.StatBank_api.get_subjects(emne_id)
-        self.dlg.listWidget_2.addItems([i['description'] for i in underemne_data[0]['subjects']])
-
+        valgt_emne = self.dlg.listWidget.currentItem().text()
+        underemner = []
+        for underemne in self.all_subjects:
+            if valgt_emne == underemne['description']:
+                for under_underemne in underemne['subjects']:
+                    self.dlg.listWidget_2.addItem(under_underemne['description'])
+            else:
+                pass
 
 
     def run(self):
