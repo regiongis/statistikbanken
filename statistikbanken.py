@@ -187,11 +187,19 @@ class StatistikBanken:
             pass
         self.dlg.pushButton.clicked.connect(self.populate_listwidget)
 
+        # Hovedemne
         try:
             self.dlg.listWidget.itemClicked.disconnect()
         except:
             pass
         self.dlg.listWidget.itemClicked.connect(self.hent_underemne)
+
+        # Underemne
+        try:
+            self.dlg.listWidget_2.itemClicked.disconnect()
+        except:
+            pass
+        self.dlg.listWidget_2.itemClicked.connect(self.hent_under_underemne)
 
     def populate_listwidget(self):
         self.dlg.listWidget.clear()
@@ -199,16 +207,29 @@ class StatistikBanken:
         self.dlg.listWidget.addItems([i['description'] for i in self.all_subjects])
 
     def hent_underemne(self):
+        self.dlg.listWidget_3.clear()
         self.dlg.listWidget_2.clear()
-        valgt_emne = self.dlg.listWidget.currentItem().text()
-        underemner = []
+        self.valgt_emne = self.dlg.listWidget.currentItem().text()
         for underemne in self.all_subjects:
-            if valgt_emne == underemne['description']:
+            if self.valgt_emne == underemne['description']:
                 for under_underemne in underemne['subjects']:
                     self.dlg.listWidget_2.addItem(under_underemne['description'])
             else:
                 pass
 
+    def hent_under_underemne(self):
+        self.dlg.listWidget_3.clear()
+        self.valgt_underemne = self.dlg.listWidget_2.currentItem().text()
+        for underemne in self.all_subjects:
+            if self.valgt_emne == underemne['description']:
+                for under_underemne in underemne['subjects']:
+                    if self.valgt_underemne == under_underemne['description']:
+                        for tabel in under_underemne['subjects']:
+                            self.dlg.listWidget_3.addItem(tabel['description'])
+                    else:
+                        pass
+            else:
+                pass
 
     def run(self):
         """Run method that performs all the real work"""
