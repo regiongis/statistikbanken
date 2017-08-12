@@ -201,12 +201,20 @@ class StatistikBanken:
             pass
         self.dlg.listWidget_2.itemClicked.connect(self.hent_under_underemne)
 
+        # Under undermne
+        try:
+            self.dlg.listWidget_3.itemClicked.disconnect()
+        except:
+            pass
+        self.dlg.listWidget_3.itemClicked.connect(self.hent_tabeller)
+
     def populate_listwidget(self):
         self.dlg.listWidget.clear()
         self.all_subjects = self.StatBank_api.get_all_subjects()
         self.dlg.listWidget.addItems([i['description'] for i in self.all_subjects])
 
     def hent_underemne(self):
+        self.dlg.listWidget_4.clear()
         self.dlg.listWidget_3.clear()
         self.dlg.listWidget_2.clear()
         self.valgt_emne = self.dlg.listWidget.currentItem().text()
@@ -218,6 +226,7 @@ class StatistikBanken:
                 pass
 
     def hent_under_underemne(self):
+        self.dlg.listWidget_4.clear()
         self.dlg.listWidget_3.clear()
         self.valgt_underemne = self.dlg.listWidget_2.currentItem().text()
         for underemne in self.all_subjects:
@@ -230,6 +239,19 @@ class StatistikBanken:
                         pass
             else:
                 pass
+
+    def hent_tabeller(self):
+        self.dlg.listWidget_4.clear()
+        self.valgt_under_underemne = self.dlg.listWidget_3.currentItem().text()
+        for underemne in self.all_subjects:
+            if self.valgt_emne == underemne['description']:
+                for under_underemne in underemne['subjects']:
+                    if self.valgt_underemne == under_underemne['description']:
+                        for under_under_underemne in under_underemne['subjects']:
+                            if self.valgt_under_underemne == under_under_underemne['description']:
+                                for tabel in under_under_underemne['tables']:
+                                    self.dlg.listWidget_4.addItem(tabel['text'])    
+
 
     def run(self):
         """Run method that performs all the real work"""

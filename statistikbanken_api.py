@@ -25,7 +25,7 @@ class Statbank_api():
         Henter alle emner, underemner og tabeller fra API'et.
         '''
         funktion = 'subjects'
-        data = {'recursive': 'true', 'format': 'JSON'}
+        data = {'recursive': 'true', 'format': 'JSON', 'includeTables': 'true'}
         return self.get_json(self.url, funktion, data)
 
     def get_main_subjects(self):
