@@ -1,77 +1,255 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+"""
+/***************************************************************************
+ StatistikBanken
+                                 A QGIS plugin
+ Dette plugin henter data fra Statistikbanken
+                              -------------------
+        begin                : 2017-04-20
+        git sha              : $Format:%H$
+        copyright            : (C) 2017 by Daníel Örn Árnason
+        email                : danielarnason85@gmail.com
+ ***************************************************************************/
 
-import urllib2
-import json
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+"""
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from PyQt4.QtGui import QAction, QIcon
+# Import the code for the dialog
+from statistikbanken_dialog import StatistikBankenDialog
+import os.path
 
-baseurl = 'http://api.statbank.dk/v1/'
+from statistikbanken_api import Statbank_api
 
-def get_json(url,function, data):
-    '''
-     Henter JSON data fra url.
-    '''
+class StatistikBanken:
+    """QGIS Plugin Implementation."""
 
-    req = urllib2.Request(url + function, headers={'Content-Type': 'application/json'})
-    response = urllib2.urlopen(req, json.dumps(data))
-    charset = response.headers.getparam('charset')
-    result = json.loads(response.read().decode(charset))
+    def __init__(self, iface):
+        """Constructor.
 
-    return result
+        :param iface: An interface instance that will be passed to this class
+            which provides the hook by which you can manipulate the QGIS
+            application at run time.
+        :type iface: QgsInterface
+        """
+        # Save reference to the QGIS interface
+        self.iface = iface
+        # initialize plugin directory
+        self.plugin_dir = os.path.dirname(__file__)
+        # initialize locale
+        locale = QSettings().value('locale/userLocale')[0:2]
+        locale_path = os.path.join(
+            self.plugin_dir,
+            'i18n',
+            'StatistikBanken_{}.qm'.format(locale))
 
-def get_all_subjects():
-    '''
-    Henter alle emner, underemner og tabeller fra API'et. 
-    '''
-    funktion = 'subjects'
-    data = {'recursive': 'true','includetables': 'true', 'format': 'JSON'}
-    return get_json(baseurl, funktion, data)
+        if os.path.exists(locale_path):
+            self.translator = QTranslator()
+            self.translator.load(locale_path)
 
-def get_main_subjects():
-    '''
-    Henter alle hovedemner fra API'et.
-    '''
-
-    return get_json(baseurl, 'subjects', {})
-
-def get_subjects(subject_ids):
-    '''
-    Henter alle underemner fra et eller flere hovedemner.
-     
-     Tager i mod en liste af hovedemne id. F.eks. ['02', '03']
-    '''
-
-    data = {'subjects': subject_ids, 'format': 'JSON'}
-    return get_json(baseurl, 'subjects', data)
-
-def get_variables(table_id):
-    post_body = {
-	    'table': table_id,
-	    'format': 'JSON'
-    }
-    table = get_json(baseurl, 'tableinfo', post_body)
-    variables = table['variables']
-    variables_lst = [{'id': i['id'], 'text': i['text'], 'values': i['values']} for i in variables]
-
-    return variables_lst
-
-def get_data(table, variables):
-    '''henter data fra API i JSONSTAT format'''
-    endpoint = 'data'
-    post_body = \
-        {
-            "table": table,
-            "variables": variables,
-            "format": "JSONSTAT"
-        }
-    return get_json(baseurl, endpoint, post_body)
+            if qVersion() > '4.3.3':
+                QCoreApplication.installTranslator(self.translator)
 
 
+        # Declare instance attributes
+        self.actions = []
+        self.menu = self.tr(u'&Statistikbanken')
+        # TODO: We are going to let the user set this up in a future iteration
+        self.toolbar = self.iface.addToolBar(u'StatistikBanken')
+        self.toolbar.setObjectName(u'StatistikBanken')
 
-if __name__ == '__main__':
-    # table = 'folk1a'
-    # variables = [
-    #     {'code': 'OMRÅDE', 'values': ["151", "169"]},
-    #     {'code': 'TID', 'values': ["2017K1", "2016K3"]}
-    # ]
-    # data = get_data(table, variables)
-    # print data
+    # noinspection PyMethodMayBeStatic
+    def tr(self, message):
+        """Get the translation for a string using Qt translation API.
+
+        We implement this ourselves since we do not inherit QObject.
+
+        :param message: String for translation.
+        :type message: str, QString
+
+        :returns: Translated version of message.
+        :rtype: QString
+        """
+        # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
+        return QCoreApplication.translate('StatistikBanken', message)
+
+
+    def add_action(
+        self,
+        icon_path,
+        text,
+        callback,
+        enabled_flag=True,
+        add_to_menu=True,
+        add_to_toolbar=True,
+        status_tip=None,
+        whats_this=None,
+        parent=None):
+        """Add a toolbar icon to the toolbar.
+
+        :param icon_path: Path to the icon for this action. Can be a resource
+            path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
+        :type icon_path: str
+
+        :param text: Text that should be shown in menu items for this action.
+        :type text: str
+
+        :param callback: Function to be called when the action is triggered.
+        :type callback: function
+
+        :param enabled_flag: A flag indicating if the action should be enabled
+            by default. Defaults to True.
+        :type enabled_flag: bool
+
+        :param add_to_menu: Flag indicating whether the action should also
+            be added to the menu. Defaults to True.
+        :type add_to_menu: bool
+
+        :param add_to_toolbar: Flag indicating whether the action should also
+            be added to the toolbar. Defaults to True.
+        :type add_to_toolbar: bool
+
+        :param status_tip: Optional text to show in a popup when mouse pointer
+            hovers over the action.
+        :type status_tip: str
+
+        :param parent: Parent widget for the new action. Defaults None.
+        :type parent: QWidget
+
+        :param whats_this: Optional text to show in the status bar when the
+            mouse pointer hovers over the action.
+
+        :returns: The action that was created. Note that the action is also
+            added to self.actions list.
+        :rtype: QAction
+        """
+
+        # Create the dialog (after translation) and keep reference
+        self.dlg = StatistikBankenDialog()
+
+        icon = QIcon(icon_path)
+        action = QAction(icon, text, parent)
+        action.triggered.connect(callback)
+        action.setEnabled(enabled_flag)
+
+        if status_tip is not None:
+            action.setStatusTip(status_tip)
+
+        if whats_this is not None:
+            action.setWhatsThis(whats_this)
+
+        if add_to_toolbar:
+            self.toolbar.addAction(action)
+
+        if add_to_menu:
+            self.iface.addPluginToWebMenu(
+                self.menu,
+                action)
+
+        self.actions.append(action)
+
+        return action
+
+    def initGui(self):
+        """Create the menu entries and toolbar icons inside the QGIS GUI."""
+
+        icon_path =  os.path.join(self.plugin_dir, 'icon.png')
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Hent data fra DST'),
+            callback=self.run,
+            parent=self.iface.mainWindow())
+
+
+    def unload(self):
+        """Removes the plugin menu item and icon from QGIS GUI."""
+        for action in self.actions:
+            self.iface.removePluginWebMenu(
+                self.tr(u'&Statistikbanken'),
+                action)
+            self.iface.removeToolBarIcon(action)
+        # remove the toolbar
+        del self.toolbar
+
+    def connections(self):
+        """Forbinder gui til funktioner"""
+        # Test knappen
+        try:
+            self.dlg.pushButton.clicked.disconnect()
+        except:
+            pass
+        self.dlg.pushButton.clicked.connect(self.populate_listwidget)
+
+        # Hovedemne
+        try:
+            self.dlg.listWidget.itemClicked.disconnect()
+        except:
+            pass
+        self.dlg.listWidget.itemClicked.connect(self.hent_underemne)
+
+        # Underemne
+        try:
+            self.dlg.listWidget_2.itemClicked.disconnect()
+        except:
+            pass
+        self.dlg.listWidget_2.itemClicked.connect(self.hent_under_underemne)
+
+    def populate_listwidget(self):
+        self.dlg.listWidget.clear()
+        self.all_subjects = self.StatBank_api.get_all_subjects()
+        self.dlg.listWidget.addItems([i['description'] for i in self.all_subjects])
+
+    def hent_underemne(self):
+        self.dlg.listWidget_3.clear()
+        self.dlg.listWidget_2.clear()
+        self.valgt_emne = self.dlg.listWidget.currentItem().text()
+        for underemne in self.all_subjects:
+            if self.valgt_emne == underemne['description']:
+                for under_underemne in underemne['subjects']:
+                    self.dlg.listWidget_2.addItem(under_underemne['description'])
+            else:
+                pass
+
+    def hent_under_underemne(self):
+        self.dlg.listWidget_3.clear()
+        self.valgt_underemne = self.dlg.listWidget_2.currentItem().text()
+        for underemne in self.all_subjects:
+            if self.valgt_emne == underemne['description']:
+                for under_underemne in underemne['subjects']:
+                    if self.valgt_underemne == under_underemne['description']:
+                        for tabel in under_underemne['subjects']:
+                            self.dlg.listWidget_3.addItem(tabel['description'])
+                    else:
+                        pass
+            else:
+                pass
+
+    def run(self):
+        """Run method that performs all the real work"""
+
+        # Vores funktioner
+        self.StatBank_api = Statbank_api()
+
+        # Forbindelser til knapper
+        self.connections()
+
+        # Tilføj data til listviews
+        self.populate_listwidget()
+
+        # show the dialog
+        self.dlg.show()
+
+        # Run the dialog event loop
+        result = self.dlg.exec_()
+        # See if OK was pressed
+        if result:
+            # Do something useful here - delete the line containing pass and
+            # substitute with your code.
+            pass
