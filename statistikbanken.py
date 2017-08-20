@@ -210,47 +210,39 @@ class StatistikBanken:
 
     def populate_listwidget(self):
         self.dlg.listWidget.clear()
-        self.all_subjects = self.StatBank_api.get_all_subjects()
-        self.dlg.listWidget.addItems([i['description'] for i in self.all_subjects])
+        self.main_subjects = self.StatBank_api.get_main_subjects()
+        self.dlg.listWidget.addItems([i['description'] for i in self.main_subjects])
 
     def hent_underemne(self):
         self.dlg.listWidget_4.clear()
         self.dlg.listWidget_3.clear()
         self.dlg.listWidget_2.clear()
-        self.valgt_emne = self.dlg.listWidget.currentItem().text()
-        for underemne in self.all_subjects:
-            if self.valgt_emne == underemne['description']:
-                for under_underemne in underemne['subjects']:
-                    self.dlg.listWidget_2.addItem(under_underemne['description'])
-            else:
-                pass
+        valgt_emne = self.dlg.listWidget.currentItem().text()
+        for main_subject in self.main_subjects:
+            if valgt_emne == main_subject['description']:
+                self.subjects = self.StatBank_api.get_subjects([main_subject['id']])
+                for subject in self.subjects[0]['subjects']:
+                    self.dlg.listWidget_2.addItem(subject['description'])
 
     def hent_under_underemne(self):
-        self.dlg.listWidget_4.clear()
         self.dlg.listWidget_3.clear()
-        self.valgt_underemne = self.dlg.listWidget_2.currentItem().text()
-        for underemne in self.all_subjects:
-            if self.valgt_emne == underemne['description']:
-                for under_underemne in underemne['subjects']:
-                    if self.valgt_underemne == under_underemne['description']:
-                        for tabel in under_underemne['subjects']:
-                            self.dlg.listWidget_3.addItem(tabel['description'])
-                    else:
-                        pass
-            else:
-                pass
+        self.dlg.listWidget_4.clear()
+        valgt_underemne = self.dlg.listWidget_2.currentItem().text()
+        for subject in self.subjects[0]['subjects']:
+            if valgt_underemne == subject['description']:
+                self.sub_subjects = subject['subjects']
+                for sub_subject in subject['subjects']:
+                    self.dlg.listWidget_3.addItem(sub_subject['description'])
 
     def hent_tabeller(self):
         self.dlg.listWidget_4.clear()
-        self.valgt_under_underemne = self.dlg.listWidget_3.currentItem().text()
-        for underemne in self.all_subjects:
-            if self.valgt_emne == underemne['description']:
-                for under_underemne in underemne['subjects']:
-                    if self.valgt_underemne == under_underemne['description']:
-                        for under_under_underemne in under_underemne['subjects']:
-                            if self.valgt_under_underemne == under_under_underemne['description']:
-                                for tabel in under_under_underemne['tables']:
-                                    self.dlg.listWidget_4.addItem(tabel['text'])    
+        valgt_under_underemne = self.dlg.listWidget_3.currentItem().text()
+        for item in self.sub_subjects:
+            if item['description'] == valgt_under_underemne:
+                data = self.StatBank_api.get_table([item['id']])
+                for table in data:
+                    self.dlg.listWidget_4.addItem(table['text'])
+
 
 
     def run(self):

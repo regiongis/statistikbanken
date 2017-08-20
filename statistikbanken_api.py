@@ -25,7 +25,7 @@ class Statbank_api():
         Henter alle emner, underemner og tabeller fra API'et.
         '''
         funktion = 'subjects'
-        data = {'recursive': 'true', 'format': 'JSON', 'includeTables': 'true'}
+        data = {'recursive': 'true', 'format': 'JSON'}
         return self.get_json(self.url, funktion, data)
 
     def get_main_subjects(self):
@@ -42,7 +42,7 @@ class Statbank_api():
          Tager i mod en liste af hovedemne id. F.eks. ['02', '03']
         '''
 
-        data = {'subjects': subject_ids, 'format': 'JSON'}
+        data = {'subjects': subject_ids, 'format': 'JSON', 'recursive': 'true'}
         return self.get_json(self.url, 'subjects', data)
 
     def get_variables(self,table_id):
@@ -58,6 +58,17 @@ class Statbank_api():
         variables_lst = [{'id': i['id'], 'text': i['text'], 'values': i['values']} for i in variables]
 
         return variables_lst
+
+    def get_table(self, subject_id):
+        '''
+            Henter tabel (og variabler)
+        '''
+        post_body = {
+            'subjects': subject_id,
+            'format': 'JSON'
+        }
+        return self.get_json(self.url, 'tables', post_body)
+
 
     def get_data(self, table, variables):
         '''henter data fra API i JSONSTAT format'''
