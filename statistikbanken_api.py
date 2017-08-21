@@ -45,6 +45,27 @@ class Statbank_api():
         data = {'subjects': subject_ids, 'format': 'JSON', 'recursive': 'true'}
         return self.get_json(self.url, 'subjects', data)
 
+    def has_municipalities(self, subject):
+        '''Returning tables within a subject with "område" as an variable,
+        indicating data might hold municipality code as an geographic reference'''
+        endpoint = 'tables'
+        post_body = \
+            {
+                "subjects": [
+                    subject
+                ]
+            }
+
+        tables = self.get_json(self.url, endpoint, post_body)
+
+        table_list = []
+
+        for table in tables:
+            if u'område' in table['variables']:
+                table_list.append(table)
+
+        return table_list
+
     def get_variables(self,table_id):
         '''
         Henter variabler og værdier for en tabel
