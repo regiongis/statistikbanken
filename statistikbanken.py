@@ -239,7 +239,7 @@ class StatistikBanken:
         valgt_under_underemne = self.dlg.listWidget_3.currentItem().text()
         for item in self.sub_subjects:
             if item['description'] == valgt_under_underemne:
-                data = self.StatBank_api.has_municipalities(item['id'])
+                data = self.StatBank_api.get_tables(item['id'])
                 for table in data:
                     self.dlg.listWidget_4.addItem(table['text'])
 
