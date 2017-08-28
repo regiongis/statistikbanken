@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
+from PyQt4.QtGui import QAction, QIcon, QTreeWidget, QTreeWidgetItem
 # Import the code for the dialog
 from statistikbanken_dialog import StatistikBankenDialog
 import os.path
@@ -178,70 +178,81 @@ class StatistikBanken:
         # remove the toolbar
         del self.toolbar
 
+    def populate_tree(self):
+        tree = self.dlg.treeWidget
+        
+        emner = self.StatBank_api.get_main_subjects()
+        lst = []
+        for emne in emner:
+            description = emne['description']
+            lst.append(QTreeWidgetItem(description))
+        tree.addTopLevelItems(lst)
+
     def connections(self):
-        """Forbinder gui til funktioner"""
-        # Test knappen
-        try:
-            self.dlg.pushButton.clicked.disconnect()
-        except:
-            pass
-        self.dlg.pushButton.clicked.connect(self.populate_listwidget)
+        pass
+#        """Forbinder gui til funktioner"""
+#        # Test knappen
+#        try:
+#            self.dlg.pushButton.clicked.disconnect()
+#        except:
+#            pass
+#        self.dlg.pushButton.clicked.connect(self.populate_listwidget)
+#
+#        # Hovedemne
+#        try:
+#            self.dlg.listWidget.itemClicked.disconnect()
+#        except:
+#            pass
+#        self.dlg.listWidget.itemClicked.connect(self.hent_underemne)
+#
+#        # Underemne
+#        try:
+#            self.dlg.listWidget_2.itemClicked.disconnect()
+#        except:
+#            pass
+#        self.dlg.listWidget_2.itemClicked.connect(self.hent_under_underemne)
+#
+#        # Under undermne
+#        try:
+#            self.dlg.listWidget_3.itemClicked.disconnect()
+#        except:
+#            pass
+#        self.dlg.listWidget_3.itemClicked.connect(self.hent_tabeller)
 
-        # Hovedemne
-        try:
-            self.dlg.listWidget.itemClicked.disconnect()
-        except:
-            pass
-        self.dlg.listWidget.itemClicked.connect(self.hent_underemne)
-
-        # Underemne
-        try:
-            self.dlg.listWidget_2.itemClicked.disconnect()
-        except:
-            pass
-        self.dlg.listWidget_2.itemClicked.connect(self.hent_under_underemne)
-
-        # Under undermne
-        try:
-            self.dlg.listWidget_3.itemClicked.disconnect()
-        except:
-            pass
-        self.dlg.listWidget_3.itemClicked.connect(self.hent_tabeller)
-
-    def populate_listwidget(self):
-        self.dlg.listWidget.clear()
-        self.main_subjects = self.StatBank_api.get_main_subjects()
-        self.dlg.listWidget.addItems([i['description'] for i in self.main_subjects])
-
-    def hent_underemne(self):
-        self.dlg.listWidget_4.clear()
-        self.dlg.listWidget_3.clear()
-        self.dlg.listWidget_2.clear()
-        valgt_emne = self.dlg.listWidget.currentItem().text()
-        for main_subject in self.main_subjects:
-            if valgt_emne == main_subject['description']:
-                self.subjects = self.StatBank_api.get_subjects([main_subject['id']])
-                for subject in self.subjects[0]['subjects']:
-                    self.dlg.listWidget_2.addItem(subject['description'])
-
-    def hent_under_underemne(self):
-        self.dlg.listWidget_3.clear()
-        self.dlg.listWidget_4.clear()
-        valgt_underemne = self.dlg.listWidget_2.currentItem().text()
-        for subject in self.subjects[0]['subjects']:
-            if valgt_underemne == subject['description']:
-                self.sub_subjects = subject['subjects']
-                for sub_subject in subject['subjects']:
-                    self.dlg.listWidget_3.addItem(sub_subject['description'])
-
-    def hent_tabeller(self):
-        self.dlg.listWidget_4.clear()
-        valgt_under_underemne = self.dlg.listWidget_3.currentItem().text()
-        for item in self.sub_subjects:
-            if item['description'] == valgt_under_underemne:
-                data = self.StatBank_api.get_tables(item['id'])
-                for table in data:
-                    self.dlg.listWidget_4.addItem(table['text'])
+#    def populate_listwidget(self):
+#        self.dlg.listWidget.clear()
+#        self.main_subjects = self.StatBank_api.get_main_subjects()
+#        self.dlg.listWidget.addItems([i['description'] for i in self.main_subjects])
+#
+#    def hent_underemne(self):
+#        self.dlg.listWidget_4.clear()
+#        self.dlg.listWidget_3.clear()
+#        self.dlg.listWidget_2.clear()
+#        valgt_emne = self.dlg.listWidget.currentItem().text()
+#        for main_subject in self.main_subjects:
+#            if valgt_emne == main_subject['description']:
+#                self.subjects = self.StatBank_api.get_subjects([main_subject['id']])
+#                for subject in self.subjects[0]['subjects']:
+#                    self.dlg.listWidget_2.addItem(subject['description'])
+#
+#    def hent_under_underemne(self):
+#        self.dlg.listWidget_3.clear()
+#        self.dlg.listWidget_4.clear()
+#        valgt_underemne = self.dlg.listWidget_2.currentItem().text()
+#        for subject in self.subjects[0]['subjects']:
+#            if valgt_underemne == subject['description']:
+#                self.sub_subjects = subject['subjects']
+#                for sub_subject in subject['subjects']:
+#                    self.dlg.listWidget_3.addItem(sub_subject['description'])
+#
+#    def hent_tabeller(self):
+#        self.dlg.listWidget_4.clear()
+#        valgt_under_underemne = self.dlg.listWidget_3.currentItem().text()
+#        for item in self.sub_subjects:
+#            if item['description'] == valgt_under_underemne:
+#                data = self.StatBank_api.get_tables(item['id'])
+#                for table in data:
+#                    self.dlg.listWidget_4.addItem(table['text'])
 
 
 
@@ -255,7 +266,11 @@ class StatistikBanken:
         self.connections()
 
         # Tilføj data til listviews
-        self.populate_listwidget()
+#        self.populate_listwidget()
+        
+
+        # test af nye funktioner
+        self.populate_tree()
 
         # show the dialog
         self.dlg.show()
