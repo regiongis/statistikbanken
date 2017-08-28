@@ -179,14 +179,20 @@ class StatistikBanken:
         del self.toolbar
 
     def populate_tree(self):
-        tree = self.dlg.treeWidget
+        self.tree = self.dlg.treeWidget
         
         emner = self.StatBank_api.get_main_subjects()
         lst = []
         for emne in emner:
             description = emne['description']
             lst.append(QTreeWidgetItem([description]))
-        tree.addTopLevelItems(lst)
+        self.tree.addTopLevelItems(lst)
+        self.add_childs()
+        
+    def add_childs(self):
+        parent = QTreeWidgetItem(self.tree.topLevelItem(0))
+        child = QTreeWidgetItem(['TEST'])
+        parent.addChild(child)
 
     def connections(self):
         pass
