@@ -185,7 +185,7 @@ class StatistikBanken:
         lst = []
         for emne in emner:
             description = emne['description']
-            lst.append(QTreeWidgetItem(description))
+            lst.append(QTreeWidgetItem([description]))
         tree.addTopLevelItems(lst)
 
     def connections(self):
