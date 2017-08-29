@@ -179,6 +179,9 @@ class StatistikBanken:
         del self.toolbar
 
     def populate_tree(self):
+        """
+        Fylder treewidget med data fra Statistikbankens API
+        """
         self.tree = self.dlg.treeWidget
         
         self.emner = self.StatBank_api.get_all_subjects()
@@ -187,20 +190,29 @@ class StatistikBanken:
             description = emne['description']
             lst.append(QTreeWidgetItem([description]))
         self.tree.addTopLevelItems(lst)
+
+        self.add_all_childnodes()
+
+    def add_all_childnodes(self):
+        """
+        Indsætter childnodes for hver parent
+        """
         iterator = QTreeWidgetItemIterator(self.tree)
         
         while iterator.value():
             item = iterator.value()
             id = None
             for emne in self.emner:
-                if item.text(0) == emne['description']:
-                    id = emne['id']
-                    data = self.StatBank_api.get_subjects([ str( id ) ])
-                    for i in data:
-                        if i['id'] == id:
-                            for subject in emne['subjects']:
-                                child = QTreeWidgetItem([subject['description']])
-                                item.addChild(child)
+                if emne['hasSubjects']:
+                    if item.text(0) == emne['description']:
+                        id = emne['id']
+                        data = self.StatBank_api.get_subjects([ str( id ) ])
+                        for i in data:
+                            if i['hasSubjects']:
+                                if i['id'] == id:
+                                    for subject in emne['subjects']:
+                                        child = QTreeWidgetItem([subject['description']])
+                                        item.addChild(child)
 
             iterator += 1
 
