@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon, QTreeWidget, QTreeWidgetItem
+from PyQt4.QtGui import QAction, QIcon, QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator
 # Import the code for the dialog
 from statistikbanken_dialog import StatistikBankenDialog
 import os.path
@@ -181,18 +181,39 @@ class StatistikBanken:
     def populate_tree(self):
         self.tree = self.dlg.treeWidget
         
-        emner = self.StatBank_api.get_main_subjects()
+        self.emner = self.StatBank_api.get_all_subjects()
         lst = []
-        for emne in emner:
+        for emne in self.emner:
             description = emne['description']
             lst.append(QTreeWidgetItem([description]))
         self.tree.addTopLevelItems(lst)
-        self.add_childs()
+        iterator = QTreeWidgetItemIterator(self.tree)
         
+        while iterator.value():
+            item = iterator.value()
+            id = None
+            for emne in self.emner:
+                if item.text(0) == emne['description']:
+                    id = emne['id']
+            print(id)   
+
+
+            iterator += 1
+
     def add_childs(self):
-        parent = QTreeWidgetItem(self.tree.topLevelItem(0))
-        child = QTreeWidgetItem(['TEST'])
-        parent.addChild(child)
+        parent = self.tree.topLevelItem(0).text(0)
+        for emne in self.emner:
+            if parent == emne['description']:
+                print(emne['id'])
+
+#        child = QTreeWidgetItem(['TEST'])
+#        parent.addChild(child)
+
+#    def add_children(self):
+#        for alle toplevelitems i treewidget:
+#            find emne id for api kald
+#            fremkald en liste over underemner
+#            tilføj som childnode til det tilsvarende toplevelitem
 
     def connections(self):
         pass
