@@ -195,25 +195,14 @@ class StatistikBanken:
             for emne in self.emner:
                 if item.text(0) == emne['description']:
                     id = emne['id']
-            print(id)   
-
+                    data = self.StatBank_api.get_subjects([ str( id ) ])
+                    for i in data:
+                        if i['id'] == id:
+                            for subject in emne['subjects']:
+                                child = QTreeWidgetItem([subject['description']])
+                                item.addChild(child)
 
             iterator += 1
-
-    def add_childs(self):
-        parent = self.tree.topLevelItem(0).text(0)
-        for emne in self.emner:
-            if parent == emne['description']:
-                print(emne['id'])
-
-#        child = QTreeWidgetItem(['TEST'])
-#        parent.addChild(child)
-
-#    def add_children(self):
-#        for alle toplevelitems i treewidget:
-#            find emne id for api kald
-#            fremkald en liste over underemner
-#            tilføj som childnode til det tilsvarende toplevelitem
 
     def connections(self):
         pass
