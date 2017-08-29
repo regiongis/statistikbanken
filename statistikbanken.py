@@ -184,25 +184,26 @@ class StatistikBanken:
         """
         self.tree = self.dlg.treeWidget
         
-        self.emner = self.StatBank_api.get_all_subjects()
+        emner = self.StatBank_api.get_all_subjects()
         lst = []
-        for emne in self.emner:
+        for emne in emner:
             description = emne['description']
             lst.append(QTreeWidgetItem([description]))
         self.tree.addTopLevelItems(lst)
 
-        self.add_all_childnodes()
+#        self.add_all_childnodes()
 
     def add_all_childnodes(self):
         """
         Indsætter childnodes for hver parent
         """
         iterator = QTreeWidgetItemIterator(self.tree)
-        
+        emner = self.StatBank_api.get_all_subjects()
+
         while iterator.value():
             item = iterator.value()
             id = None
-            for emne in self.emner:
+            for emne in emner:
                 if emne['hasSubjects']:
                     if item.text(0) == emne['description']:
                         id = emne['id']
@@ -216,9 +217,30 @@ class StatistikBanken:
 
             iterator += 1
 
+    def add_childnodes(self):
+#        print(self.tree.currentItem().text(0))
+        valgt_emne = self.tree.currentItem()
+        emner = self.StatBank_api.get_all_subjects()
+        id = None
+
+        for emne in emner:
+            if valgt_emne.text(0) == emne['description']:
+                if emne['hasSubjects']:
+                    for subject in emne['subjects']:
+                        child = QTreeWidgetItem([subject['description']])
+                        valgt_emne.addChild(child)
+        self.tree.expandItem(valgt_emne)
+
+
+
     def connections(self):
-        pass
 #        """Forbinder gui til funktioner"""
+        # Valg af emne
+        try:
+            self.dlg.treeWidget.itemClicked.disconnect()
+        except:
+            pass
+        self.dlg.treeWidget.itemClicked.connect(self.add_childnodes)
 #        # Test knappen
 #        try:
 #            self.dlg.pushButton.clicked.disconnect()
