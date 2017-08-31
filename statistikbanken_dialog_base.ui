@@ -14,13 +14,6 @@
    <string>Statistikbanken</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0" colspan="2">
-    <widget class="QPushButton" name="pushButton">
-     <property name="text">
-      <string>TEST KNAP</string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="0">
     <widget class="QTreeWidget" name="treeWidget">
      <attribute name="headerVisible">
