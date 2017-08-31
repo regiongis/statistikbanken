@@ -206,14 +206,7 @@ class StatistikBanken:
         # Vores funktioner
         self.StatBank_api = Statbank_api()
 
-        # Forbindelser til knapper
-        self.connections()
-
-        # Tilføj data til listviews
-#        self.populate_listwidget()
-        
-
-        # test af nye funktioner
+        # fylder treeWidget med data
         self.populate_tree()
 
         # show the dialog
