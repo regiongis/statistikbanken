@@ -183,15 +183,14 @@ class StatistikBanken:
         Fylder treewidget med data fra Statistikbankens API
         """
         self.tree = self.dlg.treeWidget
-        
-        emner = self.StatBank_api.get_all_subjects()
-        lst = []
-        for emne in emner:
-            description = emne['description']
-            lst.append(QTreeWidgetItem([description]))
-        self.tree.addTopLevelItems(lst)
+        data = self.StatBank_api.get_all_subjects()
 
-#        self.add_all_childnodes()
+        self.fill_widget(self.tree, data)
+#        lst = []
+#        for emne in emner:
+#            description = emne['description']
+#            lst.append(QTreeWidgetItem([description]))
+#        self.tree.addTopLevelItems(lst)
 
     def add_all_childnodes(self):
         """
@@ -231,16 +230,46 @@ class StatistikBanken:
                         valgt_emne.addChild(child)
         self.tree.expandItem(valgt_emne)
 
+    def fill_item(self, item, value):
+        if type(value) is dict:
+            for key, val in sorted(value.iteritems()):
+                child = QTreeWidgetItem()
+                child.setText(0, unicode(key))
+                item.addChild(child)
+                self.fill_item(child, val)
+        elif type(value) is list:
+            for val in value:
+                child = QTreeWidgetItem()
+                item.addChild(child)
+                if type(val) is dict:
+                    child.setText(0, val['description'])
+                    self.fill_item(child, val)
+                elif type(val) is list:
+                    child.setText(0, '[list]')
+                    self.fill_item(child, val)
+                else:
+                    child.setText(0, unicode(value))
+        else:
+            child = QTreeWidgetItem()
+            child.setText(0, unicode(value))
+            item.addChild(child)
+            
+
+    def fill_widget(self, widget, value):
+        widget.clear()
+        self.fill_item(widget.invisibleRootItem(), value)
+
 
 
     def connections(self):
+        pass
 #        """Forbinder gui til funktioner"""
-        # Valg af emne
-        try:
-            self.dlg.treeWidget.itemClicked.disconnect()
-        except:
-            pass
-        self.dlg.treeWidget.itemClicked.connect(self.add_childnodes)
+#        # Valg af emne
+#        try:
+#            self.dlg.treeWidget.itemClicked.disconnect()
+#        except:
+#            pass
+#        self.dlg.treeWidget.itemClicked.connect(self.add_childnodes_test)
 #        # Test knappen
 #        try:
 #            self.dlg.pushButton.clicked.disconnect()
