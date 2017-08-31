@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
+from PyQt4.QtGui import QAction, QIcon, QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator
 # Import the code for the dialog
 from statistikbanken_dialog import StatistikBankenDialog
 import os.path
@@ -178,72 +178,27 @@ class StatistikBanken:
         # remove the toolbar
         del self.toolbar
 
-    def connections(self):
-        """Forbinder gui til funktioner"""
-        # Test knappen
-        try:
-            self.dlg.pushButton.clicked.disconnect()
-        except:
-            pass
-        self.dlg.pushButton.clicked.connect(self.populate_listwidget)
+    def populate_tree(self):
+        """
+        Fylder treewidget med data fra Statistikbankens API
+        """
+        self.tree = self.dlg.treeWidget
+        data = self.StatBank_api.get_all_subjects()
 
-        # Hovedemne
-        try:
-            self.dlg.listWidget.itemClicked.disconnect()
-        except:
-            pass
-        self.dlg.listWidget.itemClicked.connect(self.hent_underemne)
+        self.fill_widget(self.tree, data)
 
-        # Underemne
-        try:
-            self.dlg.listWidget_2.itemClicked.disconnect()
-        except:
-            pass
-        self.dlg.listWidget_2.itemClicked.connect(self.hent_under_underemne)
-
-        # Under undermne
-        try:
-            self.dlg.listWidget_3.itemClicked.disconnect()
-        except:
-            pass
-        self.dlg.listWidget_3.itemClicked.connect(self.hent_tabeller)
-
-    def populate_listwidget(self):
-        self.dlg.listWidget.clear()
-        self.main_subjects = self.StatBank_api.get_main_subjects()
-        self.dlg.listWidget.addItems([i['description'] for i in self.main_subjects])
-
-    def hent_underemne(self):
-        self.dlg.listWidget_4.clear()
-        self.dlg.listWidget_3.clear()
-        self.dlg.listWidget_2.clear()
-        valgt_emne = self.dlg.listWidget.currentItem().text()
-        for main_subject in self.main_subjects:
-            if valgt_emne == main_subject['description']:
-                self.subjects = self.StatBank_api.get_subjects([main_subject['id']])
-                for subject in self.subjects[0]['subjects']:
-                    self.dlg.listWidget_2.addItem(subject['description'])
-
-    def hent_under_underemne(self):
-        self.dlg.listWidget_3.clear()
-        self.dlg.listWidget_4.clear()
-        valgt_underemne = self.dlg.listWidget_2.currentItem().text()
-        for subject in self.subjects[0]['subjects']:
-            if valgt_underemne == subject['description']:
-                self.sub_subjects = subject['subjects']
-                for sub_subject in subject['subjects']:
-                    self.dlg.listWidget_3.addItem(sub_subject['description'])
-
-    def hent_tabeller(self):
-        self.dlg.listWidget_4.clear()
-        valgt_under_underemne = self.dlg.listWidget_3.currentItem().text()
-        for item in self.sub_subjects:
-            if item['description'] == valgt_under_underemne:
-                data = self.StatBank_api.get_table([item['id']])
-                for table in data:
-                    self.dlg.listWidget_4.addItem(table['text'])
+    def fill_item(self, item, value):
+        for val in value:
+            child = QTreeWidgetItem()
+            item.addChild(child)
+            child.setText(0, val['description'])
+            if val['hasSubjects']:
+                self.fill_item(child, val['subjects'])
 
 
+    def fill_widget(self, widget, value):
+        widget.clear()
+        self.fill_item(widget.invisibleRootItem(), value)
 
     def run(self):
         """Run method that performs all the real work"""
@@ -251,11 +206,8 @@ class StatistikBanken:
         # Vores funktioner
         self.StatBank_api = Statbank_api()
 
-        # Forbindelser til knapper
-        self.connections()
-
-        # Tilføj data til listviews
-        self.populate_listwidget()
+        # fylder treeWidget med data
+        self.populate_tree()
 
         # show the dialog
         self.dlg.show()

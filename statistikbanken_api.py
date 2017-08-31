@@ -8,13 +8,13 @@ class Statbank_api():
 
     url = 'http://api.statbank.dk/v1/'
 
-    def get_json(self, url, function, data):
+    def get_json(self, url, endpoint, post_body):
         '''
          Henter JSON data fra url.
         '''
 
-        req = urllib2.Request(url + function, headers={'Content-Type': 'application/json'})
-        response = urllib2.urlopen(req, json.dumps(data))
+        req = urllib2.Request(url + endpoint, headers={'Content-Type': 'application/json'})
+        response = urllib2.urlopen(req, json.dumps(post_body))
         charset = response.headers.getparam('charset')
         result = json.loads(response.read().decode(charset))
 
@@ -45,9 +45,26 @@ class Statbank_api():
         data = {'subjects': subject_ids, 'format': 'JSON', 'recursive': 'true'}
         return self.get_json(self.url, 'subjects', data)
 
-    def has_municipalities(self, subject):
-        '''Returning tables within a subject with "område" as an variable,
-        indicating data might hold municipality code as an geographic reference'''
+    def get_tables(self, subject):
+        '''Returning tables within a subject with "område" as a variable and "101"
+        as one of the values indicating table might contain municipality code
+        as an geographic reference'''
+
+        def has_municipalitycode(table_id):
+            '''Check if table holds municipality codes and return boolean'''
+            endpoint = 'tableinfo'
+            post_body = \
+                {
+                    "table": table_id
+                }
+            res = self.get_json(self.url, endpoint, post_body)
+
+            if any(item['id'] == u'OMRÅDE' and any(i['id'] == '101' for i in item['values']) for item in res['variables'] ):
+                return True
+            else:
+                return False
+
+        #Preparing request
         endpoint = 'tables'
         post_body = \
             {
@@ -58,10 +75,11 @@ class Statbank_api():
 
         tables = self.get_json(self.url, endpoint, post_body)
 
+        # Filtering tables with "område" as variable and municipalitycode 101 as value
         table_list = []
 
         for table in tables:
-            if u'område' in table['variables']:
+            if u'område' in table['variables'] and has_municipalitycode(table['id']):
                 table_list.append(table)
 
         return table_list
@@ -80,17 +98,6 @@ class Statbank_api():
 
         return variables_lst
 
-    def get_table(self, subject_id):
-        '''
-            Henter tabel (og variabler)
-        '''
-        post_body = {
-            'subjects': subject_id,
-            'format': 'JSON'
-        }
-        return self.get_json(self.url, 'tables', post_body)
-
-
     def get_data(self, table, variables):
         '''henter data fra API i JSONSTAT format'''
         endpoint = 'data'
@@ -101,3 +108,4 @@ class Statbank_api():
                 "format": "JSONSTAT"
             }
         return self.get_json(self.url, endpoint, post_body)
+
