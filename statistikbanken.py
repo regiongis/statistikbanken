@@ -186,154 +186,19 @@ class StatistikBanken:
         data = self.StatBank_api.get_all_subjects()
 
         self.fill_widget(self.tree, data)
-#        lst = []
-#        for emne in emner:
-#            description = emne['description']
-#            lst.append(QTreeWidgetItem([description]))
-#        self.tree.addTopLevelItems(lst)
-
-    def add_all_childnodes(self):
-        """
-        Indsætter childnodes for hver parent
-        """
-        iterator = QTreeWidgetItemIterator(self.tree)
-        emner = self.StatBank_api.get_all_subjects()
-
-        while iterator.value():
-            item = iterator.value()
-            id = None
-            for emne in emner:
-                if emne['hasSubjects']:
-                    if item.text(0) == emne['description']:
-                        id = emne['id']
-                        data = self.StatBank_api.get_subjects([ str( id ) ])
-                        for i in data:
-                            if i['hasSubjects']:
-                                if i['id'] == id:
-                                    for subject in emne['subjects']:
-                                        child = QTreeWidgetItem([subject['description']])
-                                        item.addChild(child)
-
-            iterator += 1
-
-    def add_childnodes(self):
-#        print(self.tree.currentItem().text(0))
-        valgt_emne = self.tree.currentItem()
-        emner = self.StatBank_api.get_all_subjects()
-        id = None
-
-        for emne in emner:
-            if valgt_emne.text(0) == emne['description']:
-                if emne['hasSubjects']:
-                    for subject in emne['subjects']:
-                        child = QTreeWidgetItem([subject['description']])
-                        valgt_emne.addChild(child)
-        self.tree.expandItem(valgt_emne)
 
     def fill_item(self, item, value):
-        if type(value) is dict:
-            for key, val in sorted(value.iteritems()):
-                child = QTreeWidgetItem()
-                child.setText(0, unicode(key))
-                item.addChild(child)
-                self.fill_item(child, val)
-        elif type(value) is list:
-            for val in value:
-                child = QTreeWidgetItem()
-                item.addChild(child)
-                if type(val) is dict:
-                    child.setText(0, val['description'])
-                    self.fill_item(child, val)
-                elif type(val) is list:
-                    child.setText(0, '[list]')
-                    self.fill_item(child, val)
-                else:
-                    child.setText(0, unicode(value))
-        else:
+        for val in value:
             child = QTreeWidgetItem()
-            child.setText(0, unicode(value))
             item.addChild(child)
-            
+            child.setText(0, val['description'])
+            if val['hasSubjects']:
+                self.fill_item(child, val['subjects'])
+
 
     def fill_widget(self, widget, value):
         widget.clear()
         self.fill_item(widget.invisibleRootItem(), value)
-
-
-
-    def connections(self):
-        pass
-#        """Forbinder gui til funktioner"""
-#        # Valg af emne
-#        try:
-#            self.dlg.treeWidget.itemClicked.disconnect()
-#        except:
-#            pass
-#        self.dlg.treeWidget.itemClicked.connect(self.add_childnodes_test)
-#        # Test knappen
-#        try:
-#            self.dlg.pushButton.clicked.disconnect()
-#        except:
-#            pass
-#        self.dlg.pushButton.clicked.connect(self.populate_listwidget)
-#
-#        # Hovedemne
-#        try:
-#            self.dlg.listWidget.itemClicked.disconnect()
-#        except:
-#            pass
-#        self.dlg.listWidget.itemClicked.connect(self.hent_underemne)
-#
-#        # Underemne
-#        try:
-#            self.dlg.listWidget_2.itemClicked.disconnect()
-#        except:
-#            pass
-#        self.dlg.listWidget_2.itemClicked.connect(self.hent_under_underemne)
-#
-#        # Under undermne
-#        try:
-#            self.dlg.listWidget_3.itemClicked.disconnect()
-#        except:
-#            pass
-#        self.dlg.listWidget_3.itemClicked.connect(self.hent_tabeller)
-
-#    def populate_listwidget(self):
-#        self.dlg.listWidget.clear()
-#        self.main_subjects = self.StatBank_api.get_main_subjects()
-#        self.dlg.listWidget.addItems([i['description'] for i in self.main_subjects])
-#
-#    def hent_underemne(self):
-#        self.dlg.listWidget_4.clear()
-#        self.dlg.listWidget_3.clear()
-#        self.dlg.listWidget_2.clear()
-#        valgt_emne = self.dlg.listWidget.currentItem().text()
-#        for main_subject in self.main_subjects:
-#            if valgt_emne == main_subject['description']:
-#                self.subjects = self.StatBank_api.get_subjects([main_subject['id']])
-#                for subject in self.subjects[0]['subjects']:
-#                    self.dlg.listWidget_2.addItem(subject['description'])
-#
-#    def hent_under_underemne(self):
-#        self.dlg.listWidget_3.clear()
-#        self.dlg.listWidget_4.clear()
-#        valgt_underemne = self.dlg.listWidget_2.currentItem().text()
-#        for subject in self.subjects[0]['subjects']:
-#            if valgt_underemne == subject['description']:
-#                self.sub_subjects = subject['subjects']
-#                for sub_subject in subject['subjects']:
-#                    self.dlg.listWidget_3.addItem(sub_subject['description'])
-#
-#    def hent_tabeller(self):
-#        self.dlg.listWidget_4.clear()
-#        valgt_under_underemne = self.dlg.listWidget_3.currentItem().text()
-#        for item in self.sub_subjects:
-#            if item['description'] == valgt_under_underemne:
-#                data = self.StatBank_api.get_tables(item['id'])
-#                for table in data:
-#                    self.dlg.listWidget_4.addItem(table['text'])
-
-
 
     def run(self):
         """Run method that performs all the real work"""
