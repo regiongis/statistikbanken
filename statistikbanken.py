@@ -183,9 +183,9 @@ class StatistikBanken:
         Fylder treewidget med data fra Statistikbankens API
         """
         self.tree = self.dlg.treeWidget
-        data = self.StatBank_api.get_all_subjects()
+        self.data = self.StatBank_api.get_all_subjects()
 
-        self.fill_widget(self.tree, data)
+        self.fill_widget(self.tree, self.data)
 
     def fill_item(self, item, value):
         for val in value:
@@ -200,11 +200,28 @@ class StatistikBanken:
         widget.clear()
         self.fill_item(widget.invisibleRootItem(), value)
 
+    def connections(self):
+
+        # klik paa item i træ og faa tabelinfo 
+        try:
+            self.dlg.treeWidget.itemClicked.disconnect()
+        except:
+            pass
+        self.dlg.treeWidget.itemClicked.connect(self.get_tables)
+
+    def get_tables(self):
+
+        valgt_emne = self.tree.currentItem()
+        print(valgt_emne, valgt_emne.text(0))
+
     def run(self):
         """Run method that performs all the real work"""
 
         # Vores funktioner
         self.StatBank_api = Statbank_api()
+
+        # forbindelser til events
+        self.connections()
 
         # fylder treeWidget med data
         self.populate_tree()
