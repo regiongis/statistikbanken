@@ -25,6 +25,8 @@ from PyQt4.QtGui import QAction, QIcon, QTreeWidget, QTreeWidgetItem, QTreeWidge
 # Import the code for the dialog
 from statistikbanken_dialog import StatistikBankenDialog
 import os.path
+from urllib2 import URLError
+from qgis.gui import QgsMessageBar
 
 from statistikbanken_api import Statbank_api
 
@@ -207,7 +209,11 @@ class StatistikBanken:
         self.StatBank_api = Statbank_api()
 
         # fylder treeWidget med data
-        self.populate_tree()
+        try:
+            self.populate_tree()
+        except URLError:
+            self.iface.messageBar().pushMessage('FEJL', 'Der er ikke nogen forbindelse til internettet', level=QgsMessageBar.CRITICAL, duration=5)
+            return
 
         # show the dialog
         self.dlg.show()
