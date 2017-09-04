@@ -212,7 +212,19 @@ class StatistikBanken:
     def get_tables(self):
 
         valgt_emne = self.tree.currentItem()
-        print(valgt_emne, valgt_emne.text(0))
+        emne_id = self.find_id_in_data(self.data, valgt_emne.text(0))
+
+
+    def find_id_in_data(self, data, valgt_emne):
+        
+        for item in data:
+            if item['description'] == valgt_emne:
+                print(item['id'])
+                return item['id']
+            elif item['description'] != valgt_emne and item['hasSubjects'] == True:
+                new_item = item['subjects']
+                self.find_id_in_data(new_item, valgt_emne)
+
 
     def run(self):
         """Run method that performs all the real work"""
