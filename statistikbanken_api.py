@@ -119,6 +119,9 @@ class Statbank_api():
         return QgsMapLayerRegistry.instance().addMapLayer(data)
 
 
+#########################
+###### SANDKASSE ########
+#########################
 
 table = {
     "table_id": "folk1a",
@@ -128,10 +131,6 @@ table = {
         "KØN": ['TOT']
     }
 }
-
-#########################
-###### SANDKASSE ########
-#########################
 
 dst = Statbank_api()
 test = dst.data_url(table)
