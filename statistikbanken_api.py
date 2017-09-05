@@ -129,6 +129,10 @@ table = {
     }
 }
 
+#########################
+###### SANDKASSE ########
+#########################
+
 dst = Statbank_api()
 test = dst.data_url(table)
 print test
