@@ -98,14 +98,59 @@ class Statbank_api():
 
         return variables_lst
 
-    def get_data(self, table, variables):
-        '''henter data fra API i JSONSTAT format'''
+    def data_url(self, table):
+        '''preparing variables and other param for the url'''
+
+        var = table["variables"]
+        var_lst = []
+
+        for key, value in var.iteritems():
+            var_lst.append(urllib2.quote(key) + '=' + ','.join(value))
+
+        urlvar = '&'.join(var_lst)
         endpoint = 'data'
-        post_body = \
-            {
-                "table": table,
-                "variables": variables,
-                "format": "JSONSTAT"
-            }
-        return self.get_json(self.url, endpoint, post_body)
+        uri = 'CSV:/vsicurl_streaming/{0}{1}/{2}/CSV?valuePresentation=Code&delimiter=Semicolon&{3}'.format(self.url,endpoint,table['table_id'],urlvar)
+
+        return uri
+
+    def add_layer(self, layer_name, path):
+        '''add data to layers panel (uses GET request for DST data)'''
+        data = QgsVectorLayer(path, layer_name, 'ogr')
+        return QgsMapLayerRegistry.instance().addMapLayer(data)
+
+
+
+table = {
+    "table_id": "folk1a",
+    "variables": {
+        "OMRÅDE": ["*"],
+        "TID": ["2017K2", "2017K3"],
+        "KØN": ['TOT']
+    }
+}
+
+dst = Statbank_api()
+test = dst.data_url(table)
+print test
+#dst.add_layer(table['table_id'], test)
+
+## tilføj kommune lag (Denne sti skal sættes til data folderen i statistikbank plugin mappen)
+#geom_path = '/home/baffioso/.qgis2/python/plugins/statistikbanken-treewidget/data/kommune.geojson'
+#kom =  QgsVectorLayer(geom_path, 'kommune', 'ogr')
+#QgsMapLayerRegistry.instance().addMapLayer(kom)
+#
+## tilføj DST data (her bruges GET request)
+#uri = 'CSV:/vsicurl_streaming/http://api.statbank.dk/v1/data/folk1a/CSV?valuePresentation=Code&delimiter=Semicolon&OMR%C3%85DE=*&Tid=2017K2'
+#dst = QgsVectorLayer(uri, 'folk1a', 'ogr')
+#QgsMapLayerRegistry.instance().addMapLayer(dst)
+#
+##Lav join mellem kommunekode (Vi skal finde ud af om kommunekode altid hedder 'OMRÅDE' hos DST)
+#omr = u'OMRÅDE'
+#komkode = 'KOMKODE'
+#joinObject = QgsVectorJoinInfo()
+#joinObject.joinLayerId = dst.id()
+#joinObject.joinFieldName = omr
+#joinObject.targetFieldName = komkode
+#joinObject.memoryCache = True
+#kom.addJoin(joinObject)
 
